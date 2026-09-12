@@ -10,7 +10,8 @@ interface KPFormGeneratorProps {
   formNumber: number;
   caseData: any;
   buttonText?: string;
-  variant?: "default" | "outline" | "ghost" | "secondary";
+  variant?: "default" | "outline" | "ghost" | "secondary" | "cobalt";
+  className?: string;
 }
 
 export const KPFormGenerator = ({
@@ -18,6 +19,7 @@ export const KPFormGenerator = ({
   caseData,
   buttonText = "Generate KP Form",
   variant = "default",
+  className,
 }: KPFormGeneratorProps) => {
   const [isClient, setIsClient] = useState(false);
 
@@ -79,7 +81,7 @@ export const KPFormGenerator = ({
     >
       {/* @ts-ignore */}
       {({ loading }) => (
-        <Button variant={variant} disabled={loading} size="sm">
+        <Button variant={variant} disabled={loading} size="sm" className={className}>
           <Printer className="mr-2 h-4 w-4" />
           {loading ? "Preparing PDF..." : buttonText}
         </Button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,14 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Search, RefreshCw } from "lucide-react";
+import { Plus, Search, RefreshCw, ChevronRight, FileText, Filter } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
@@ -35,20 +28,37 @@ interface Case {
   personnelInCharge?: string;
 }
 
-const statusColors: Record<string, string> = {
-  PENDING: "bg-slate-100 text-slate-800",
-  MEDIATION: "bg-yellow-100 text-yellow-800",
-  CONCILIATION: "bg-orange-100 text-orange-800",
-  ARBITRATION: "bg-red-100 text-red-800",
-  SETTLED: "bg-green-100 text-green-800",
-  DISMISSED: "bg-slate-100 text-slate-500",
+const getStatusBadge = (status: string) => {
+  switch (status?.toUpperCase()) {
+    case "SETTLED":
+      return <Badge variant="success">Settled</Badge>;
+    case "MEDIATION":
+      return <Badge variant="attention">Mediation</Badge>;
+    case "CONCILIATION":
+      return <Badge variant="attention">Conciliation</Badge>;
+    case "ARBITRATION":
+      return <Badge variant="critical">Arbitration</Badge>;
+    case "DISMISSED":
+      return <Badge variant="secondary">Dismissed</Badge>;
+    default:
+      return <Badge variant="outline">Pending</Badge>;
+  }
 };
+
+const FILTER_TABS = [
+  { id: "ALL", label: "All Dockets" },
+  { id: "MEDIATION", label: "Mediation" },
+  { id: "CONCILIATION", label: "Conciliation" },
+  { id: "ARBITRATION", label: "Arbitration" },
+  { id: "SETTLED", label: "Settled" },
+  { id: "DISMISSED", label: "Dismissed" },
+];
 
 export default function CasesPage() {
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   const fetchCases = useCallback(async () => {
     setLoading(true);
@@ -75,115 +85,159 @@ export default function CasesPage() {
   }, [fetchCases]);
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-6">
+      {/* 1. Header & Quick Action */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#f0f2f5]">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Cases & Blotters</h2>
-          <p className="text-muted-foreground">
-            Manage and track all barangay dispute cases
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0064e0]">
+              Barangay Blotter Registry
+            </span>
+            <span className="size-1 rounded-full bg-[#8899a6]" />
+            <span className="text-xs font-bold text-[#657786]">Official Dockets</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#0a1317]">
+            Cases & Blotters
+          </h1>
+          <p className="text-sm text-[#657786] mt-1">
+            Browse and monitor active Katarungang Pambarangay dispute proceedings.
           </p>
         </div>
+
         <Link
           href="/dashboard/cases/new"
-          className={cn(buttonVariants(), "bg-blue-600 hover:bg-blue-500")}
+          className="btn-pill-cobalt text-sm px-6 py-2.5 flex items-center gap-2 self-start sm:self-auto"
         >
-          <Plus className="mr-2 h-4 w-4" />
-          New Case
+          <Plus className="h-4 w-4" />
+          <span>New Blotter Case</span>
         </Link>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-4 py-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            id="case-search"
-            placeholder="Search by name, case no., or title..."
-            className="pl-8"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      {/* 2. Pill Tabs Filters & Search Pill */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Pill Tab Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          {FILTER_TABS.map((tab) => {
+            const isActive = statusFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setStatusFilter(tab.id)}
+                className={cn(
+                  "rounded-full px-4 py-2 text-xs md:text-sm font-bold whitespace-nowrap transition-all cursor-pointer",
+                  isActive
+                    ? "bg-[#14161a] text-white shadow-2xs"
+                    : "bg-white text-[#465a65] border border-[#e4e6eb] hover:bg-[#f5f6f8] hover:text-[#0a1317]"
+                )}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
-        <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val ?? "ALL")}>
-          <SelectTrigger className="w-44" id="status-filter">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All Statuses</SelectItem>
-            <SelectItem value="PENDING">Pending</SelectItem>
-            <SelectItem value="MEDIATION">Mediation</SelectItem>
-            <SelectItem value="CONCILIATION">Conciliation</SelectItem>
-            <SelectItem value="ARBITRATION">Arbitration</SelectItem>
-            <SelectItem value="SETTLED">Settled</SelectItem>
-            <SelectItem value="DISMISSED">Dismissed</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button variant="ghost" size="icon" onClick={fetchCases} title="Refresh">
-          <RefreshCw className="h-4 w-4" />
-        </Button>
+
+        {/* Search & Refresh Pill */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1 md:w-72">
+            <Search className="absolute left-3.5 top-3.5 size-4 text-[#8899a6]" />
+            <Input
+              id="case-search"
+              placeholder="Search docket, parties, or title..."
+              className="pl-10 h-10 rounded-full border-[#e4e6eb] bg-white text-xs font-medium focus-visible:ring-[#0064e0]"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <button
+            onClick={fetchCases}
+            title="Refresh Dockets"
+            className="flex size-10 items-center justify-center rounded-full border border-[#e4e6eb] bg-white text-[#657786] hover:text-[#0a1317] hover:bg-[#f5f6f8] transition-colors"
+          >
+            <RefreshCw className={cn("size-4", loading && "animate-spin text-[#0064e0]")} />
+          </button>
+        </div>
       </div>
 
-      <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+      {/* 3. Dockets Table Container ({rounded.xxxl} 32px rounded) */}
+      <div className="rounded-[28px] md:rounded-[32px] border border-[#f0f2f5] bg-white shadow-2xs overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-50">
-            <TableRow>
-              <TableHead className="font-semibold">Case No.</TableHead>
-              <TableHead className="font-semibold">Date Filed</TableHead>
-              <TableHead className="font-semibold">Complaint</TableHead>
-              <TableHead className="font-semibold">Complainant</TableHead>
-              <TableHead className="font-semibold">Respondent</TableHead>
-              <TableHead className="font-semibold">In-Charge</TableHead>
-              <TableHead className="font-semibold">Status</TableHead>
-              <TableHead className="text-right font-semibold">Actions</TableHead>
+          <TableHeader className="bg-[#fbfcff] border-b border-[#f0f2f5]">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="font-bold text-xs uppercase tracking-wider text-[#657786] pl-6">
+                Docket #
+              </TableHead>
+              <TableHead className="font-bold text-xs uppercase tracking-wider text-[#657786]">
+                Date Filed
+              </TableHead>
+              <TableHead className="font-bold text-xs uppercase tracking-wider text-[#657786]">
+                Complaint
+              </TableHead>
+              <TableHead className="font-bold text-xs uppercase tracking-wider text-[#657786]">
+                Complainant vs Respondent
+              </TableHead>
+              <TableHead className="font-bold text-xs uppercase tracking-wider text-[#657786]">
+                In-Charge
+              </TableHead>
+              <TableHead className="font-bold text-xs uppercase tracking-wider text-[#657786]">
+                Status
+              </TableHead>
+              <TableHead className="font-bold text-xs uppercase tracking-wider text-[#657786] text-right pr-6">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-12">
-                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Loading cases...
+                <TableCell colSpan={7} className="text-center py-16">
+                  <div className="flex flex-col items-center justify-center gap-2 text-[#8899a6]">
+                    <RefreshCw className="size-5 animate-spin text-[#0064e0]" />
+                    <span className="text-xs font-bold">Querying Turso cloud database...</span>
                   </div>
                 </TableCell>
               </TableRow>
             ) : cases.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
-                  No cases found. {search && "Try a different search term."}
+                <TableCell colSpan={7} className="text-center py-16 text-[#8899a6]">
+                  <p className="text-sm font-bold text-[#0a1317] mb-1">No dockets matched criteria</p>
+                  <p className="text-xs">Try selecting a different filter tab or clearing your search.</p>
                 </TableCell>
               </TableRow>
             ) : (
               cases.map((c) => (
-                <TableRow key={c.id} className="hover:bg-slate-50/80 transition-colors">
-                  <TableCell className="font-semibold text-blue-700">
+                <TableRow key={c.id} className="hover:bg-[#f8f9fa] transition-colors border-b border-[#f0f2f5]">
+                  <TableCell className="font-mono font-bold text-xs text-[#0064e0] pl-6 py-4">
                     {c.caseNumber}
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="text-xs font-semibold text-[#657786]">
                     {format(new Date(c.dateFiled), "MMM dd, yyyy")}
                   </TableCell>
-                  <TableCell className="max-w-[160px] truncate">
-                    {c.complaintTitle}
+                  <TableCell className="max-w-[180px]">
+                    <span className="font-bold text-sm text-[#0a1317] block truncate">
+                      {c.complaintTitle}
+                    </span>
                   </TableCell>
-                  <TableCell>{c.complainantName}</TableCell>
-                  <TableCell>{c.respondentName}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {c.personnelInCharge || "—"}
+                  <TableCell className="text-xs">
+                    <span className="font-bold text-[#0a1317] block">
+                      {c.complainantName}
+                    </span>
+                    <span className="text-[#8899a6]">
+                      vs. {c.respondentName}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-xs text-[#657786]">
+                    {c.personnelInCharge || "Barangay PB"}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className={statusColors[c.status]}
-                    >
-                      {c.status}
-                    </Badge>
+                    {getStatusBadge(c.status)}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right pr-6">
                     <Link
                       href={`/dashboard/cases/${c.id}`}
-                      className={buttonVariants({ variant: "ghost", size: "sm" })}
+                      className="inline-flex items-center gap-1 rounded-full border border-[#e4e6eb] bg-white px-3.5 py-1 text-xs font-bold text-[#14161a] hover:bg-[#14161a] hover:text-white transition-all shadow-2xs"
                     >
-                      View
+                      <span>Open</span>
+                      <ChevronRight className="size-3" />
                     </Link>
                   </TableCell>
                 </TableRow>
@@ -194,10 +248,12 @@ export default function CasesPage() {
       </div>
 
       {!loading && (
-        <p className="text-xs text-muted-foreground">
-          Showing {cases.length} case{cases.length !== 1 ? "s" : ""}
-        </p>
+        <div className="flex items-center justify-between text-xs text-[#8899a6] px-2">
+          <span>Showing {cases.length} docket{cases.length !== 1 ? "s" : ""}</span>
+          <span>Republic Act No. 7160 • Section 408-412</span>
+        </div>
       )}
     </div>
   );
 }
+
