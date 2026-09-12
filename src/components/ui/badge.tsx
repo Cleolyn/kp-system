@@ -5,20 +5,21 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!",
+  "group/badge inline-flex h-6 w-fit shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full border border-transparent px-3 py-0.5 text-xs font-bold whitespace-nowrap transition-all focus-visible:ring-3 focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&>svg]:pointer-events-none [&>svg]:size-3.5!",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
-        secondary:
-          "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
-        destructive:
-          "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
-        outline:
-          "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
-        ghost:
-          "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "bg-[#14161a] text-white",
+        secondary: "bg-[#f5f6f8] text-[#1c2b33] border border-[#e4e6eb]",
+        outline: "border border-[#e4e6eb] text-[#1c2b33] bg-white",
+        cobalt: "bg-[#0064e0]/10 text-[#0064e0] border border-[#0064e0]/20",
+        success: "bg-[#00875a]/10 text-[#00875a] border border-[#00875a]/20",
+        attention: "bg-[#f59e0b]/15 text-[#b45309] border border-[#f59e0b]/30",
+        warning: "bg-[#ffd700] text-[#0a1317] border border-[#ffd700]",
+        critical: "bg-[#e02424]/10 text-[#e02424] border border-[#e02424]/20",
+        destructive: "bg-[#e02424]/10 text-[#e02424] border border-[#e02424]/20",
+        ghost: "hover:bg-black/5 text-[#657786]",
+        link: "text-[#0064e0] underline-offset-4 hover:underline",
       },
     },
     defaultVariants: {
