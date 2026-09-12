@@ -8,6 +8,24 @@
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
+    --color-kp-cobalt: #0064e0;
+    --color-kp-cobalt-deep: #0047ab;
+    --color-kp-cobalt-soft: rgba(0, 100, 224, 0.12);
+    --color-kp-ink-deep: #0a1317;
+    --color-kp-ink: #1c2b33;
+    --color-kp-charcoal: #465a65;
+    --color-kp-slate: #657786;
+    --color-kp-steel: #8899a6;
+    --color-kp-stone: #aab8c2;
+    --color-kp-hairline: #e4e6eb;
+    --color-kp-hairline-soft: #f0f2f5;
+    --color-kp-surface-soft: #f5f6f8;
+    --color-kp-warning: #ffd700;
+    --color-kp-success: #00875a;
+    --color-kp-attention: #f59e0b;
+    --color-kp-critical: #e02424;
+    --radius-xxxl: 32px;
+    --radius-feature: 40px;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -120,11 +138,29 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
   html {
     @apply font-sans;
-    }
+  }
+}
+
+@layer utilities {
+  .btn-pill-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-[#14161a] text-white hover:bg-[#2d3748] px-7 py-3 text-sm font-bold shadow-xs transition-all active:scale-[0.98];
+  }
+  .btn-pill-cobalt {
+    @apply inline-flex items-center justify-center rounded-full bg-[#0064e0] text-white hover:bg-[#004fc4] px-7 py-3 text-sm font-bold shadow-xs transition-all active:scale-[0.98];
+  }
+  .btn-pill-secondary {
+    @apply inline-flex items-center justify-center rounded-full border-2 border-[#14161a] text-[#14161a] hover:bg-[#14161a]/5 px-6 py-2.5 text-sm font-bold transition-all active:scale-[0.98];
+  }
+  .btn-pill-ghost {
+    @apply inline-flex items-center justify-center rounded-full border border-black/10 text-[#14161a] hover:bg-black/5 px-5 py-2 text-sm font-bold transition-all;
+  }
+  .card-32 {
+    @apply rounded-[32px] bg-white border border-[#f0f2f5];
+  }
 }
