@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,7 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, Plus, UserCheck } from "lucide-react";
+import { Users, Plus, ShieldCheck, UserCheck, Scale, Award } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Member {
   id: string;
@@ -33,10 +32,15 @@ interface Member {
   createdAt: string;
 }
 
-const roleColors: Record<string, string> = {
-  ADMIN: "bg-red-100 text-red-800",
-  LUPON: "bg-blue-100 text-blue-800",
-  STAFF: "bg-slate-100 text-slate-700",
+const getRoleBadge = (role: string) => {
+  switch (role?.toUpperCase()) {
+    case "ADMIN":
+      return <Badge variant="critical">Punong Barangay (Admin)</Badge>;
+    case "LUPON":
+      return <Badge variant="cobalt">Lupon Conciliator</Badge>;
+    default:
+      return <Badge variant="secondary">Barangay Staff</Badge>;
+  }
 };
 
 export default function MembersPage() {
@@ -47,7 +51,7 @@ export default function MembersPage() {
     name: "",
     username: "",
     password: "",
-    role: "STAFF",
+    role: "LUPON",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -81,7 +85,7 @@ export default function MembersPage() {
         return;
       }
       setOpen(false);
-      setForm({ name: "", username: "", password: "", role: "STAFF" });
+      setForm({ name: "", username: "", password: "", role: "LUPON" });
       fetchMembers();
     } catch {
       setError("Connection error");
@@ -90,45 +94,58 @@ export default function MembersPage() {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
+      {/* Header & Modal CTA */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#f0f2f5]">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Lupon Members</h2>
-          <p className="text-muted-foreground">
-            Manage barangay personnel and Lupon members
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0064e0]">
+              Lupong Tagapamayapa
+            </span>
+            <span className="size-1 rounded-full bg-[#8899a6]" />
+            <span className="text-xs font-bold text-[#657786]">Section 399, RA 7160</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#0a1317]">
+            Lupon Members & Personnel
+          </h1>
+          <p className="text-sm text-[#657786] mt-1">
+            Authorized conciliators, mediators, and administrative staff for barangay justice.
           </p>
         </div>
+
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger className={cn(buttonVariants(), "bg-blue-600 hover:bg-blue-500 cursor-pointer")}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Member
+          <DialogTrigger className="btn-pill-cobalt text-sm px-6 py-2.5 flex items-center gap-2 self-start sm:self-auto cursor-pointer">
+            <Plus className="h-4 w-4" />
+            <span>Appoint Member</span>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="rounded-[28px]">
             <DialogHeader>
-              <DialogTitle>Add Barangay Personnel</DialogTitle>
+              <DialogTitle>Appoint Lupon Member / Staff</DialogTitle>
               <DialogDescription>
-                Create a new account for a barangay employee or Lupon member.
+                Register an appointed peace conciliator or barangay administrative secretary.
               </DialogDescription>
             </DialogHeader>
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+              <div className="text-xs font-bold text-[#e02424] bg-red-50 border border-red-200 rounded-xl p-3">
                 {error}
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="member-name">Full Name *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="member-name" className="text-xs font-bold">Full Name *</Label>
                 <Input
                   id="member-name"
+                  placeholder="e.g. Atty. Roberto C. Santos"
                   required
                   value={form.name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="member-username">Username *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="member-username" className="text-xs font-bold">Username *</Label>
                 <Input
                   id="member-username"
+                  placeholder="e.g. rsantos"
                   required
                   value={form.username}
                   onChange={(e) =>
@@ -136,8 +153,8 @@ export default function MembersPage() {
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="member-password">Password *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="member-password" className="text-xs font-bold">Password *</Label>
                 <Input
                   id="member-password"
                   type="password"
@@ -148,32 +165,33 @@ export default function MembersPage() {
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="member-role">Role</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="member-role" className="text-xs font-bold">Official Role</Label>
                 <Select
                   value={form.role}
-                  onValueChange={(v) => setForm((p) => ({ ...p, role: v ?? "STAFF" }))}
+                  onValueChange={(v) => setForm((p) => ({ ...p, role: v ?? "LUPON" }))}
                 >
                   <SelectTrigger id="member-role">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ADMIN">Admin</SelectItem>
-                    <SelectItem value="LUPON">Lupon Member</SelectItem>
-                    <SelectItem value="STAFF">Staff</SelectItem>
+                    <SelectItem value="LUPON">Lupon Conciliator</SelectItem>
+                    <SelectItem value="ADMIN">Punong Barangay (Admin)</SelectItem>
+                    <SelectItem value="STAFF">Barangay Secretary / Staff</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <DialogFooter>
+              <DialogFooter className="gap-2 pt-2">
                 <Button
                   type="button"
                   variant="outline"
+                  className="rounded-full"
                   onClick={() => setOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={saving}>
-                  {saving ? "Saving..." : "Add Member"}
+                <Button type="submit" variant="cobalt" disabled={saving}>
+                  {saving ? "Registering..." : "Confirm Appointment"}
                 </Button>
               </DialogFooter>
             </form>
@@ -181,39 +199,65 @@ export default function MembersPage() {
         </Dialog>
       </div>
 
+      {/* Reassurance Callout */}
+      <div className="rounded-[28px] bg-white border border-[#f0f2f5] p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="size-11 rounded-2xl bg-[#0064e0]/10 flex items-center justify-center text-[#0064e0]">
+            <Award className="size-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-[#0a1317]">
+              Lupong Tagapamayapa Statutory Constitution
+            </h4>
+            <p className="text-xs text-[#657786]">
+              Every barangay maintains 10 to 20 members appointed every 3 years by the Punong Barangay.
+            </p>
+          </div>
+        </div>
+        <span className="text-xs font-bold text-[#0064e0] bg-[#0064e0]/10 px-3 py-1 rounded-full w-fit">
+          {members.length} Active Appointees
+        </span>
+      </div>
+
+      {/* Members Grid ({rounded.xxxl} 32px Cards) */}
       {loading ? (
-        <div className="text-center py-16 text-muted-foreground">
-          Loading members...
+        <div className="py-20 text-center text-sm font-bold text-[#8899a6]">
+          Loading Lupon directory...
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {members.map((m) => (
-            <Card key={m.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center gap-3 pb-2">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+            <div
+              key={m.id}
+              className="rounded-[28px] bg-white border border-[#f0f2f5] p-6 shadow-2xs hover:border-[#0064e0]/30 transition-all space-y-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="size-12 rounded-full bg-[#14161a] text-white flex items-center justify-center font-bold text-base shrink-0 shadow-2xs">
                   {m.name.charAt(0).toUpperCase()}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="text-sm truncate">{m.name}</CardTitle>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-bold text-[#0a1317] truncate">
+                    {m.name}
+                  </h3>
+                  <p className="text-xs text-[#8899a6] truncate">
                     @{m.username}
                   </p>
                 </div>
-                <Badge className={roleColors[m.role] || roleColors.STAFF}>
-                  {m.role}
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <UserCheck className="h-3 w-3" />
-                  Member since{" "}
-                  {new Date(m.createdAt).toLocaleDateString("en-PH", {
-                    year: "numeric",
-                    month: "long",
-                  })}
+              </div>
+
+              <div className="pt-3 border-t border-[#f0f2f5] flex items-center justify-between">
+                <div>{getRoleBadge(m.role)}</div>
+                <div className="flex items-center gap-1 text-[11px] text-[#8899a6]">
+                  <UserCheck className="size-3 text-[#00875a]" />
+                  <span>
+                    {new Date(m.createdAt).toLocaleDateString("en-PH", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}

@@ -1,14 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +12,8 @@ import {
   Users,
   CheckCircle,
   Save,
-  RotateCcw,
+  ShieldCheck,
+  Server,
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -49,7 +42,6 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Load current session
     fetch("/api/auth/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -57,7 +49,6 @@ export default function SettingsPage() {
       })
       .catch(() => {});
 
-    // Load persisted settings from localStorage if available
     const saved = localStorage.getItem("kp_barangay_settings");
     if (saved) {
       try {
@@ -80,264 +71,285 @@ export default function SettingsPage() {
     );
     setTimeout(() => {
       setSaving(false);
-      setSavedMessage("Settings saved successfully!");
+      setSavedMessage("Barangay parameters saved successfully!");
       setTimeout(() => setSavedMessage(""), 3500);
     }, 400);
   };
 
   return (
-    <div className="p-8 space-y-8 max-w-5xl">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Barangay Settings</h2>
-        <p className="text-muted-foreground">
-          Configure jurisdiction information, Lupon officials, and KP
-          proceedings parameters
-        </p>
+    <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#f0f2f5]">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0064e0]">
+              Configuration & Jurisdiction
+            </span>
+            <span className="size-1 rounded-full bg-[#8899a6]" />
+            <span className="text-xs font-bold text-[#657786]">RA 7160 System Parameters</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#0a1317]">
+            Barangay Settings
+          </h1>
+          <p className="text-sm text-[#657786] mt-1">
+            Configure official municipality details, Lupon officials, and statutory timeline limits.
+          </p>
+        </div>
       </div>
 
       {savedMessage && (
-        <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          {savedMessage}
+        <div className="flex items-center gap-2 rounded-2xl bg-[#00875a]/10 border border-[#00875a]/20 p-4 text-xs font-bold text-[#00875a]">
+          <CheckCircle className="size-4" />
+          <span>{savedMessage}</span>
         </div>
       )}
 
       <form onSubmit={handleSave} className="space-y-8">
-        {/* Barangay Profile */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-blue-600" />
-              <CardTitle>Barangay Profile & Jurisdiction</CardTitle>
+        {/* Card 1: Barangay Profile */}
+        <div className="rounded-[32px] bg-white border border-[#f0f2f5] p-6 md:p-8 shadow-2xs space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-[#f0f2f5]">
+            <div className="size-10 rounded-2xl bg-[#0064e0]/10 flex items-center justify-center text-[#0064e0]">
+              <Building2 className="size-5" />
             </div>
-            <CardDescription>
-              This information will be displayed on all generated KP Forms,
-              summons, and hearing notices.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="barangayName">Barangay Name</Label>
-                <Input
-                  id="barangayName"
-                  name="barangayName"
-                  value={barangaySettings.barangayName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="municipality">City / Municipality</Label>
-                <Input
-                  id="municipality"
-                  name="municipality"
-                  value={barangaySettings.municipality}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="province">Province / District</Label>
-                <Input
-                  id="province"
-                  name="province"
-                  value={barangaySettings.province}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="region">Region</Label>
-                <Input
-                  id="region"
-                  name="region"
-                  value={barangaySettings.region}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2 col-span-1 md:col-span-2">
-                <Label htmlFor="hallAddress">Barangay Hall Address</Label>
-                <Input
-                  id="hallAddress"
-                  name="hallAddress"
-                  value={barangaySettings.hallAddress}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="contactNumber">Contact Number</Label>
-                <Input
-                  id="contactNumber"
-                  name="contactNumber"
-                  value={barangaySettings.contactNumber}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Official Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={barangaySettings.email}
-                  onChange={handleChange}
-                />
-              </div>
+            <div>
+              <h3 className="text-base font-bold text-[#0a1317]">
+                Barangay Jurisdiction Profile
+              </h3>
+              <p className="text-xs text-[#657786]">
+                Appears on all printed KP forms, summons, notices, and official certificates.
+              </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Lupon Tagapamayapa Leadership */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-indigo-600" />
-              <CardTitle>Lupon Tagapamayapa Leadership</CardTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="barangayName" className="text-xs font-bold">Barangay Name</Label>
+              <Input
+                id="barangayName"
+                name="barangayName"
+                value={barangaySettings.barangayName}
+                onChange={handleChange}
+                required
+              />
             </div>
-            <CardDescription>
-              Key officials authorized to preside over mediation hearings and sign
-              KP certificates.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="punongBarangay">
-                  Punong Barangay (Lupon Chairman)
-                </Label>
-                <Input
-                  id="punongBarangay"
-                  name="punongBarangay"
-                  value={barangaySettings.punongBarangay}
-                  onChange={handleChange}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Presides over the initial 15-day mediation stage.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="luponSecretary">
-                  Barangay Secretary / Lupon Secretary
-                </Label>
-                <Input
-                  id="luponSecretary"
-                  name="luponSecretary"
-                  value={barangaySettings.luponSecretary}
-                  onChange={handleChange}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Responsible for issuing notices and keeping blotter records.
-                </p>
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="municipality" className="text-xs font-bold">City / Municipality</Label>
+              <Input
+                id="municipality"
+                name="municipality"
+                value={barangaySettings.municipality}
+                onChange={handleChange}
+                required
+              />
             </div>
-          </CardContent>
-        </Card>
+            <div className="space-y-1.5">
+              <Label htmlFor="province" className="text-xs font-bold">Province / Metro Area</Label>
+              <Input
+                id="province"
+                name="province"
+                value={barangaySettings.province}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="region" className="text-xs font-bold">Administrative Region</Label>
+              <Input
+                id="region"
+                name="region"
+                value={barangaySettings.region}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label htmlFor="hallAddress" className="text-xs font-bold">Barangay Hall Official Address</Label>
+              <Input
+                id="hallAddress"
+                name="hallAddress"
+                value={barangaySettings.hallAddress}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="contactNumber" className="text-xs font-bold">Contact Telephone</Label>
+              <Input
+                id="contactNumber"
+                name="contactNumber"
+                value={barangaySettings.contactNumber}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs font-bold">Official Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={barangaySettings.email}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+        </div>
 
-        {/* KP Law Standards */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Scale className="h-5 w-5 text-amber-600" />
-              <CardTitle>KP Statutory Timeline (RA 7160)</CardTitle>
+        {/* Card 2: Leadership */}
+        <div className="rounded-[32px] bg-white border border-[#f0f2f5] p-6 md:p-8 shadow-2xs space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-[#f0f2f5]">
+            <div className="size-10 rounded-2xl bg-[#0064e0]/10 flex items-center justify-center text-[#0064e0]">
+              <Users className="size-5" />
             </div>
-            <CardDescription>
-              Default statutory time frames under Chapter 7 of the Local
-              Government Code of 1991.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="mediationDaysLimit">
-                  Mediation Limit (Days)
-                </Label>
-                <Input
-                  id="mediationDaysLimit"
-                  name="mediationDaysLimit"
-                  type="number"
-                  value={barangaySettings.mediationDaysLimit}
-                  onChange={handleChange}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Standard: 15 days before Punong Barangay
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="conciliationDaysLimit">
-                  Conciliation Limit (Days)
-                </Label>
-                <Input
-                  id="conciliationDaysLimit"
-                  name="conciliationDaysLimit"
-                  type="number"
-                  value={barangaySettings.conciliationDaysLimit}
-                  onChange={handleChange}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Standard: 15 days before Pangkat Tagapagkasundo
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="casePrefix">Case Number Prefix</Label>
-                <Input
-                  id="casePrefix"
-                  name="casePrefix"
-                  value={barangaySettings.casePrefix}
-                  onChange={handleChange}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Format prefix for new blotters
-                </p>
-              </div>
+            <div>
+              <h3 className="text-base font-bold text-[#0a1317]">
+                Lupon Tagapamayapa Leadership
+              </h3>
+              <p className="text-xs text-[#657786]">
+                Designated signatories for official Katarungang Pambarangay proceedings.
+              </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Current User Session */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-slate-600" />
-              <CardTitle>Session & Security</CardTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="punongBarangay" className="text-xs font-bold">
+                Punong Barangay (Lupon Chairman)
+              </Label>
+              <Input
+                id="punongBarangay"
+                name="punongBarangay"
+                value={barangaySettings.punongBarangay}
+                onChange={handleChange}
+                required
+              />
+              <p className="text-[11px] text-[#8899a6]">
+                Presides over initial 15-day Punong Barangay mediation.
+              </p>
             </div>
-            <CardDescription>
-              Your currently authenticated account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between p-4 rounded-xl border bg-slate-50">
-              <div>
-                <p className="font-semibold text-slate-900">
-                  {currentUser?.name || "Loading..."}
-                </p>
-                <p className="text-sm text-slate-500">
-                  Username: @{currentUser?.username || "—"}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-blue-100 text-blue-800">
-                  {currentUser?.role || "STAFF"}
-                </Badge>
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="luponSecretary" className="text-xs font-bold">
+                Barangay / Lupon Secretary
+              </Label>
+              <Input
+                id="luponSecretary"
+                name="luponSecretary"
+                value={barangaySettings.luponSecretary}
+                onChange={handleChange}
+                required
+              />
+              <p className="text-[11px] text-[#8899a6]">
+                Attests notices, summons, and certified true copies.
+              </p>
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-between items-center border-t pt-4">
-            <p className="text-xs text-muted-foreground">
-              Authentication powered by Iron Session (encrypted cookie)
-            </p>
+          </div>
+        </div>
+
+        {/* Card 3: Statutory Standards */}
+        <div className="rounded-[32px] bg-white border border-[#f0f2f5] p-6 md:p-8 shadow-2xs space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-[#f0f2f5]">
+            <div className="size-10 rounded-2xl bg-[#ffd700]/20 flex items-center justify-center text-[#0a1317]">
+              <Scale className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#0a1317]">
+                Statutory Timelines (RA 7160 Chapter 7)
+              </h3>
+              <p className="text-xs text-[#657786]">
+                Rules for statutory countdowns before issuing Certificate to File Action.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="mediationDaysLimit" className="text-xs font-bold">
+                Mediation Window (Days)
+              </Label>
+              <Input
+                id="mediationDaysLimit"
+                name="mediationDaysLimit"
+                type="number"
+                value={barangaySettings.mediationDaysLimit}
+                onChange={handleChange}
+              />
+              <p className="text-[11px] text-[#8899a6]">Default: 15 statutory days</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="conciliationDaysLimit" className="text-xs font-bold">
+                Pangkat Conciliation (Days)
+              </Label>
+              <Input
+                id="conciliationDaysLimit"
+                name="conciliationDaysLimit"
+                type="number"
+                value={barangaySettings.conciliationDaysLimit}
+                onChange={handleChange}
+              />
+              <p className="text-[11px] text-[#8899a6]">Extendible by 15 days</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="casePrefix" className="text-xs font-bold">
+                Docket Sequence Prefix
+              </Label>
+              <Input
+                id="casePrefix"
+                name="casePrefix"
+                value={barangaySettings.casePrefix}
+                onChange={handleChange}
+              />
+              <p className="text-[11px] text-[#8899a6]">Format: KP-YYYY-</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Infrastructure & Security */}
+        <div className="rounded-[32px] bg-white border border-[#f0f2f5] p-6 md:p-8 shadow-2xs space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-[#f0f2f5]">
+            <div className="size-10 rounded-2xl bg-[#00875a]/10 flex items-center justify-center text-[#00875a]">
+              <ShieldCheck className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#0a1317]">
+                Infrastructure & Authentication Status
+              </h3>
+              <p className="text-xs text-[#657786]">
+                Edge database and identity verification connection status.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-2xl bg-[#f5f6f8] p-4 border border-[#e4e6eb] space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#0a1317]">Turso libSQL Cloud</span>
+                <span className="size-2 rounded-full bg-[#00875a]" />
+              </div>
+              <p className="text-[11px] text-[#657786]">
+                Connected to aws-ap-northeast-1 instance (Tokyo).
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-[#f5f6f8] p-4 border border-[#e4e6eb] space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#0a1317]">Clerk Enterprise Auth</span>
+                <span className="size-2 rounded-full bg-[#0064e0]" />
+              </div>
+              <p className="text-[11px] text-[#657786]">
+                Authenticated as authorized barangay personnel.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end pt-4 border-t border-[#f0f2f5]">
             <Button
               type="submit"
+              variant="cobalt"
               disabled={saving}
-              className="bg-blue-600 hover:bg-blue-500"
+              className="px-8 py-3 text-sm flex items-center gap-2"
             >
-              <Save className="mr-2 h-4 w-4" />
-              {saving ? "Saving..." : "Save Settings"}
+              <Save className="size-4" />
+              <span>{saving ? "Saving Changes..." : "Save Barangay Settings"}</span>
             </Button>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </form>
     </div>
   );
