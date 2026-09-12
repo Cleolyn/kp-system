@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Users,
@@ -10,6 +10,12 @@ import {
   Clock,
   TrendingUp,
   AlertCircle,
+  Plus,
+  ArrowRight,
+  Shield,
+  Calendar,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -37,13 +43,21 @@ interface DashboardStats {
   }>;
 }
 
-const statusColors: Record<string, string> = {
-  PENDING: "bg-slate-100 text-slate-800",
-  MEDIATION: "bg-yellow-100 text-yellow-800",
-  CONCILIATION: "bg-orange-100 text-orange-800",
-  ARBITRATION: "bg-red-100 text-red-800",
-  SETTLED: "bg-green-100 text-green-800",
-  DISMISSED: "bg-slate-100 text-slate-500",
+const getStatusBadge = (status: string) => {
+  switch (status?.toUpperCase()) {
+    case "SETTLED":
+      return <Badge variant="success">Settled</Badge>;
+    case "MEDIATION":
+      return <Badge variant="attention">Mediation</Badge>;
+    case "CONCILIATION":
+      return <Badge variant="attention">Conciliation</Badge>;
+    case "ARBITRATION":
+      return <Badge variant="critical">Arbitration</Badge>;
+    case "DISMISSED":
+      return <Badge variant="secondary">Dismissed</Badge>;
+    default:
+      return <Badge variant="outline">Pending Intake</Badge>;
+  }
 };
 
 export default function DashboardPage() {
@@ -66,181 +80,289 @@ export default function DashboardPage() {
     };
 
     fetchStats();
-    // Auto-refresh every 30 seconds for real-time updates
     const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);
   }, []);
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center h-64">
+      <div className="p-8 md:p-12 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+          <div className="size-10 animate-spin rounded-full border-3 border-[#0064e0] border-t-transparent" />
+          <p className="text-sm font-semibold text-[#8899a6]">Loading Katarungang Pambarangay console...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-muted-foreground">
-          Welcome to the Katarungang Pambarangay Management System
-        </p>
+    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
+      {/* 1. Page Header & Dual CTAs */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#f0f2f5]">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0064e0]">
+              Barangay Justice Operations
+            </span>
+            <span className="size-1 rounded-full bg-[#8899a6]" />
+            <span className="text-xs font-bold text-[#657786]">RA 7160</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#0a1317]">
+            Console Overview
+          </h1>
+          <p className="text-sm text-[#657786] mt-1">
+            Real-time dispute conciliation, statutory deadlines, and blotter dockets.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <Link
+            href="/dashboard/cases/new"
+            className="btn-pill-cobalt text-sm px-6 py-2.5 flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>File Blotter Case</span>
+          </Link>
+          <Link
+            href="/dashboard/cases"
+            className="btn-pill-secondary text-sm px-5 py-2.5 flex items-center gap-2"
+          >
+            <span>All Dockets</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-blue-500">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Cases</CardTitle>
-            <FileText className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats?.totalCases ?? 0}</div>
-            <p className="text-xs text-muted-foreground">All recorded cases</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-yellow-500">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending / Active</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats?.pendingCases ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Require attention</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-green-500">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Settled Cases</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats?.settledCases ?? 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats?.settlementRate ?? 0}% settlement rate
+      {/* 2. Statutory Banner Strip (Warning / Attention) */}
+      <div className="rounded-2xl border border-[#ffd700] bg-[#fffdf0] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#ffd700] text-[#0a1317] font-bold text-sm">
+            !
+          </div>
+          <div>
+            <p className="text-sm font-bold text-[#0a1317]">
+              Mandatory 15-Day Mediation Enforcement
             </p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-purple-500">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Lupon</CardTitle>
-            <Users className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{stats?.activeLupon ?? 0}</div>
-            <p className="text-xs text-muted-foreground">Lupon members</p>
-          </CardContent>
-        </Card>
+            <p className="text-xs text-[#465a65]">
+              Active mediation cases must conclude or elevate to Pangkat Tagapagkasundo within 15 calendar days from first appearance.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/dashboard/hearings"
+          className="self-start sm:self-auto text-xs font-bold text-[#0064e0] hover:underline flex items-center gap-1"
+        >
+          View hearing schedules <ChevronRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
 
-      {/* Settlement Rate Progress */}
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-green-500" />
-          <CardTitle className="text-base">Settlement Rate</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-700"
-                style={{ width: `${stats?.settlementRate ?? 0}%` }}
-              />
+      {/* 3. 4-Up Metrics Grid ({rounded.xxxl} 32px Cards) */}
+      <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Metric 1 */}
+        <div className="rounded-[28px] bg-white border border-[#f0f2f5] p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#8899a6]">
+              Total Cases
+            </span>
+            <div className="size-9 rounded-full bg-[#f5f6f8] flex items-center justify-center text-[#14161a]">
+              <FileText className="size-4" />
             </div>
-            <span className="text-sm font-bold text-green-600 w-10 text-right">
-              {stats?.settlementRate ?? 0}%
+          </div>
+          <div className="text-3xl font-extrabold text-[#0a1317]">
+            {stats?.totalCases ?? 0}
+          </div>
+          <p className="text-xs text-[#657786] mt-2 flex items-center gap-1 font-medium">
+            Recorded blotter dockets
+          </p>
+        </div>
+
+        {/* Metric 2 */}
+        <div className="rounded-[28px] bg-white border border-[#f0f2f5] p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#b45309]">
+              Pending / Active
+            </span>
+            <div className="size-9 rounded-full bg-[#f59e0b]/15 flex items-center justify-center text-[#b45309]">
+              <Clock className="size-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-extrabold text-[#0a1317]">
+            {stats?.pendingCases ?? 0}
+          </div>
+          <p className="text-xs text-[#657786] mt-2 flex items-center gap-1 font-medium">
+            Requires hearing or conciliation
+          </p>
+        </div>
+
+        {/* Metric 3 */}
+        <div className="rounded-[28px] bg-white border border-[#f0f2f5] p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#00875a]">
+              Settled Cases
+            </span>
+            <div className="size-9 rounded-full bg-[#00875a]/15 flex items-center justify-center text-[#00875a]">
+              <CheckCircle className="size-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-extrabold text-[#0a1317]">
+            {stats?.settledCases ?? 0}
+          </div>
+          <p className="text-xs text-[#00875a] mt-2 flex items-center gap-1 font-bold">
+            {stats?.settlementRate ?? 0}% resolution rate
+          </p>
+        </div>
+
+        {/* Metric 4 */}
+        <div className="rounded-[28px] bg-white border border-[#f0f2f5] p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0064e0]">
+              Lupon Members
+            </span>
+            <div className="size-9 rounded-full bg-[#0064e0]/15 flex items-center justify-center text-[#0064e0]">
+              <Users className="size-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-extrabold text-[#0a1317]">
+            {stats?.activeLupon ?? 0}
+          </div>
+          <p className="text-xs text-[#657786] mt-2 flex items-center gap-1 font-medium">
+            Appointed peace conciliators
+          </p>
+        </div>
+      </div>
+
+      {/* 4. Settlement Efficiency Bar */}
+      <div className="rounded-[28px] bg-white border border-[#f0f2f5] p-6 shadow-2xs">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-[#00875a]" />
+            <span className="text-sm font-bold text-[#0a1317]">
+              Dispute Amicable Settlement Rate
             </span>
           </div>
-        </CardContent>
-      </Card>
+          <span className="text-sm font-extrabold text-[#00875a]">
+            {stats?.settlementRate ?? 0}%
+          </span>
+        </div>
+        <div className="w-full bg-[#f0f2f5] rounded-full h-3 overflow-hidden">
+          <div
+            className="h-full bg-[#00875a] rounded-full transition-all duration-700"
+            style={{ width: `${stats?.settlementRate ?? 0}%` }}
+          />
+        </div>
+      </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        {/* Recent Cases */}
-        <Card className="col-span-4">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Recent Cases</CardTitle>
+      {/* 5. 2-Column Split: Recent Cases vs Upcoming Hearings */}
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-7">
+        {/* Recent Cases (4 cols) */}
+        <div className="lg:col-span-4 rounded-[32px] bg-white border border-[#f0f2f5] p-6 md:p-8 shadow-2xs">
+          <div className="flex items-center justify-between pb-4 border-b border-[#f0f2f5] mb-4">
+            <div>
+              <h2 className="text-base font-bold text-[#0a1317]">
+                Recent Blotter Dockets
+              </h2>
+              <p className="text-xs text-[#657786]">
+                Latest filed complaints and dispute proceedings
+              </p>
+            </div>
             <Link
               href="/dashboard/cases"
-              className="text-xs text-blue-600 hover:underline"
+              className="text-xs font-bold text-[#0064e0] hover:underline flex items-center gap-1"
             >
-              View all →
+              View all <ChevronRight className="h-3.5 w-3.5" />
             </Link>
-          </CardHeader>
-          <CardContent>
-            {stats?.recentCases.length === 0 ? (
-              <div className="py-8 text-center text-sm text-muted-foreground">
-                No cases recorded yet.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {stats?.recentCases.map((c) => (
-                  <Link
-                    key={c.id}
-                    href={`/dashboard/cases/${c.id}`}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors group"
-                  >
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold group-hover:text-blue-600 transition-colors">
-                        {c.caseNumber} — {c.complaintTitle}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {c.complainantName} vs. {c.respondentName}
-                      </p>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className={statusColors[c.status]}
-                    >
-                      {c.status}
-                    </Badge>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Upcoming Hearings */}
-        <Card className="col-span-3">
-          <CardHeader className="flex flex-row items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-orange-500" />
-            <CardTitle>Upcoming Hearings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {stats?.upcomingHearings.length === 0 ? (
-              <div className="py-8 text-center text-sm text-muted-foreground">
-                No upcoming hearings scheduled.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {stats?.upcomingHearings.map((h) => (
-                  <div
-                    key={h.id}
-                    className="flex flex-col gap-1 p-2 rounded-lg border border-slate-100 bg-slate-50/50"
-                  >
-                    <p className="text-sm font-medium">
-                      {h.case.caseNumber} — {h.type}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {h.case.complaintTitle}
-                    </p>
-                    <p className="text-xs font-semibold text-orange-600">
-                      {format(new Date(h.scheduledAt), "MMM dd, yyyy h:mm a")}
+          {stats?.recentCases.length === 0 ? (
+            <div className="py-12 text-center text-sm text-[#8899a6]">
+              No complaints filed yet. Click "File Blotter Case" to start.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {stats?.recentCases.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/dashboard/cases/${c.id}`}
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-[#f0f2f5] bg-white hover:bg-[#f5f6f8] transition-all group"
+                >
+                  <div className="min-w-0 flex-1 pr-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-xs font-bold text-[#0064e0]">
+                        {c.caseNumber}
+                      </span>
+                      <span className="text-xs text-[#8899a6]">•</span>
+                      <span className="text-xs text-[#8899a6]">
+                        {format(new Date(c.createdAt), "MMM d, yyyy")}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-bold text-[#0a1317] truncate group-hover:text-[#0064e0] transition-colors">
+                      {c.complaintTitle}
+                    </h3>
+                    <p className="text-xs text-[#657786] truncate">
+                      {c.complainantName} vs. {c.respondentName}
                     </p>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  <div className="shrink-0">
+                    {getStatusBadge(c.status)}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Upcoming Hearings (3 cols) */}
+        <div className="lg:col-span-3 rounded-[32px] bg-white border border-[#f0f2f5] p-6 md:p-8 shadow-2xs">
+          <div className="flex items-center justify-between pb-4 border-b border-[#f0f2f5] mb-4">
+            <div>
+              <h2 className="text-base font-bold text-[#0a1317]">
+                Scheduled Hearings
+              </h2>
+              <p className="text-xs text-[#657786]">
+                Upcoming session hall proceedings
+              </p>
+            </div>
+            <Link
+              href="/dashboard/hearings"
+              className="text-xs font-bold text-[#0064e0] hover:underline flex items-center gap-1"
+            >
+              Calendar <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          {stats?.upcomingHearings.length === 0 ? (
+            <div className="py-12 text-center text-sm text-[#8899a6]">
+              No hearings scheduled on the calendar.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {stats?.upcomingHearings.map((h) => (
+                <div
+                  key={h.id}
+                  className="rounded-2xl border border-[#f0f2f5] bg-[#fbfcff] p-4"
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-mono text-xs font-bold text-[#0064e0]">
+                      {h.case.caseNumber}
+                    </span>
+                    <span className="rounded-full bg-[#f5f6f8] border border-[#e4e6eb] px-2.5 py-0.5 text-[10px] font-bold uppercase text-[#465a65]">
+                      {h.type}
+                    </span>
+                  </div>
+                  <h3 className="text-xs font-bold text-[#0a1317] truncate mb-2">
+                    {h.case.complaintTitle}
+                  </h3>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#b45309] pt-2 border-t border-[#f0f2f5]">
+                    <Calendar className="size-3.5" />
+                    <span>{format(new Date(h.scheduledAt), "MMM dd, yyyy • h:mm a")}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
