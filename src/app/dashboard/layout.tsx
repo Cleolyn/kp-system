@@ -26,9 +26,9 @@ export default function DashboardLayout({
       <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-50">
         <Sidebar />
       </div>
-      <main className="md:pl-72 h-full flex flex-col">
+      <main className="md:pl-72 h-full flex flex-col min-h-screen">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <div className="flex-1 overflow-auto bg-slate-50/50">
+        <div className="flex-1 overflow-auto bg-[#f8f9fa]">
           {children}
         </div>
       </main>

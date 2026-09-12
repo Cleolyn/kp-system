@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Home,
   FileText,
@@ -10,48 +10,42 @@ import {
   Settings,
   LogOut,
   Scale,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useClerk } from "@clerk/nextjs";
 
 const routes = [
   {
-    label: "Dashboard",
+    label: "Overview",
     icon: Home,
     href: "/dashboard",
-    color: "text-sky-400",
   },
   {
     label: "Cases & Blotters",
     icon: FileText,
     href: "/dashboard/cases",
-    color: "text-violet-400",
   },
   {
     label: "Hearings",
     icon: Calendar,
     href: "/dashboard/hearings",
-    color: "text-pink-400",
   },
   {
     label: "Lupon Members",
     icon: Users,
     href: "/dashboard/members",
-    color: "text-orange-400",
   },
   {
     label: "Settings",
     icon: Settings,
     href: "/dashboard/settings",
-    color: "text-slate-400",
   },
 ];
 
-import { useClerk } from "@clerk/nextjs";
-
 export const Sidebar = () => {
   const pathname = usePathname();
-  const router = useRouter();
   const { signOut } = useClerk();
 
   const handleLogout = async () => {
@@ -62,26 +56,38 @@ export const Sidebar = () => {
   };
 
   return (
-    <div className="space-y-4 py-4 flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-950 text-white border-r border-slate-700/50">
-      <div className="px-4 py-2 flex-1">
-        {/* Logo */}
+    <div className="flex flex-col h-full bg-white text-[#1c2b33] border-r border-[#f0f2f5] p-5 justify-between">
+      <div>
+        {/* Brand Crest & Wordmark */}
         <Link
           href="/dashboard"
-          className="flex items-center gap-3 pl-2 mb-10 group"
+          className="flex items-center gap-3 px-2 mb-8 group transition-opacity hover:opacity-90"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/30 group-hover:bg-blue-500 transition-colors">
-            <Scale className="h-5 w-5 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0064e0] text-white shadow-xs">
+            <Scale className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-lg font-bold leading-none">KP System</h1>
-            <p className="text-xs text-slate-500 leading-none mt-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-base font-extrabold tracking-tight text-[#0a1317]">
+                KP SYSTEM
+              </span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#0064e0]" />
+            </div>
+            <p className="text-[11px] font-semibold text-[#8899a6] tracking-wide uppercase">
               Katarungang Pambarangay
             </p>
           </div>
         </Link>
 
-        {/* Nav links */}
-        <div className="space-y-1">
+        {/* Section Label */}
+        <div className="px-3 mb-2">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-[#8899a6]">
+            Main Menu
+          </p>
+        </div>
+
+        {/* Pill Nav links */}
+        <nav className="space-y-1.5">
           {routes.map((route) => {
             const isActive =
               route.href === "/dashboard"
@@ -93,41 +99,55 @@ export const Sidebar = () => {
                 href={route.href}
                 key={route.href}
                 className={cn(
-                  "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer rounded-lg transition-all duration-150",
+                  "group flex items-center gap-3.5 px-4 py-2.5 rounded-full text-sm font-bold transition-all duration-150",
                   isActive
-                    ? "text-white bg-white/10 shadow-sm"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                    ? "bg-[#14161a] text-white shadow-xs"
+                    : "text-[#465a65] hover:text-[#0a1317] hover:bg-[#f5f6f8]"
                 )}
               >
-                <div className="flex items-center flex-1">
-                  <route.icon
-                    className={cn(
-                      "h-5 w-5 mr-3 transition-colors",
-                      isActive ? route.color : "text-zinc-600 group-hover:text-zinc-400"
-                    )}
-                  />
-                  {route.label}
-                  {isActive && (
-                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-400" />
+                <route.icon
+                  className={cn(
+                    "h-4 w-4 shrink-0 transition-colors",
+                    isActive ? "text-white" : "text-[#8899a6] group-hover:text-[#0a1317]"
                   )}
-                </div>
+                />
+                <span className="truncate">{route.label}</span>
+                {isActive && (
+                  <span className="ml-auto size-1.5 rounded-full bg-[#0064e0]" />
+                )}
               </Link>
             );
           })}
-        </div>
+        </nav>
       </div>
 
-      {/* Logout */}
-      <div className="px-4 py-2 border-t border-slate-700/50">
+      {/* Statutory Callout & Logout */}
+      <div className="space-y-4 pt-4 border-t border-[#f0f2f5]">
+        {/* Reassurance Badge Tile */}
+        <div className="rounded-2xl bg-[#f5f6f8] p-3.5 border border-[#e4e6eb]/60">
+          <div className="flex items-center gap-2 mb-1 text-[#0064e0]">
+            <ShieldCheck className="h-4 w-4" />
+            <span className="text-[11px] font-bold uppercase tracking-wide">
+              RA 7160 Compliant
+            </span>
+          </div>
+          <p className="text-xs text-[#657786] leading-snug">
+            Official statutory dispute conciliation & mediation engine.
+          </p>
+        </div>
+
+        {/* Logout Button */}
         <Button
           variant="ghost"
-          className="w-full justify-start text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+          size="sm"
+          className="w-full justify-start rounded-full text-[#657786] hover:text-[#e02424] hover:bg-red-50"
           onClick={handleLogout}
         >
-          <LogOut className="h-5 w-5 mr-3" />
-          Logout
+          <LogOut className="h-4 w-4 mr-2" />
+          Log out
         </Button>
       </div>
     </div>
   );
 };
+
